@@ -2,6 +2,7 @@ from random import randint
 import customtkinter as ctk
 from state import GameState
 from ai import minimax, alpha_beta
+import time
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -80,6 +81,10 @@ class GameGUI:
         # define starting Game State
         self.current_state = GameState(sequence, max_score=0, min_score=0, max_turn=computer_starts)
 
+        self.total_nodes = 0
+        self.total_time = 0.0
+        self.computer_moves_count = 0
+
         self.update_ui()
 
     def update_ui(self):
@@ -107,6 +112,21 @@ class GameGUI:
             self.turn_label.configure(text=f"Spēle Beigusies! {winner_text}", text_color=text_color)
             self.draw_board(disable_all=True)
             self.start_button.configure(text="Spēlēt vēlreiz")
+
+            print("\n" + "="*40)
+            print("=== SPĒLES EKSPERIMENTA REZULTĀTI ===")
+            print(f"Algoritms: {self.algo_var.get()} (Dziļums: {self.search_depth})")
+            print(f"Uzvarētājs: {winner_text}")
+            
+            if self.computer_moves_count > 0:
+                avg_time = self.total_time / self.computer_moves_count
+                print(f"Kopējais ģenerēto virsotņu skaits: {self.total_nodes}")
+                print(f"Datora gājienu skaits: {self.computer_moves_count}")
+                print(f"Kopējais patērētais laiks: {self.total_time:.4f} sekundes")
+                print(f"Vidējais laiks 1 gājienam: {avg_time:.4f} sekundes")
+            else:
+                print("Dators neveica nevienu gājienu.")
+            print("="*40 + "\n")
 
             return
         
@@ -178,11 +198,21 @@ class GameGUI:
         
         algorithm = self.algo_var.get()
 
+        stats = {"nodes": 0}
+        start_time = time.time()
+
         # choose the algorithm based on settings
         if algorithm == "Alfa-Beta":
-            _, best_state = alpha_beta(self.current_state, self.search_depth, float("-inf"), float("inf"), True)
+            _, best_state = alpha_beta(self.current_state, self.search_depth, float("-inf"), float("inf"), True, stats)
         else:
-            _, best_state = minimax(self.current_state, self.search_depth, True)
+            _, best_state = minimax(self.current_state, self.search_depth, True, stats)
+
+        end_time = time.time()
+        time_taken = end_time - start_time
+
+        self.total_nodes += stats["nodes"]
+        self.total_time += time_taken
+        self.computer_moves_count += 1
 
         if best_state:
             self.current_state = best_state

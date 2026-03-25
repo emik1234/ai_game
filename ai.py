@@ -1,6 +1,8 @@
 from state import GameState
 
-def minimax(state: GameState, depth: int, maximize: bool) -> tuple[int | float, GameState | None]:
+def minimax(state: GameState, depth: int, maximize: bool, stats: dict) -> tuple[int | float, GameState | None]:
+    stats["nodes"] += 1
+    
     # check if the game has ended
     if depth < 1 or state.is_terminal():
         return state.max_score - state.min_score, None
@@ -15,7 +17,7 @@ def minimax(state: GameState, depth: int, maximize: bool) -> tuple[int | float, 
         best_score = float("-inf")
 
         for child in state_children:
-            eval_score, _ = minimax(child, depth - 1, not maximize)
+            eval_score, _ = minimax(child, depth - 1, not maximize, stats)
 
             if eval_score > best_score:
                 best_score = eval_score
@@ -25,7 +27,7 @@ def minimax(state: GameState, depth: int, maximize: bool) -> tuple[int | float, 
         best_score = float("inf")
 
         for child in state_children:
-            eval_score, _ = minimax(child, depth - 1, not maximize)
+            eval_score, _ = minimax(child, depth - 1, not maximize, stats)
 
             if eval_score < best_score:
                 best_score = eval_score
@@ -34,7 +36,9 @@ def minimax(state: GameState, depth: int, maximize: bool) -> tuple[int | float, 
     return best_score, best_move
 
 
-def alpha_beta(state: GameState, depth: int, alpha: float, beta: float, maximize: bool) -> tuple[int | float, GameState | None]:
+def alpha_beta(state: GameState, depth: int, alpha: float, beta: float, maximize: bool, stats: dict) -> tuple[int | float, GameState | None]:
+    stats["nodes"] += 1
+    
     # check if the game has ended
     if depth < 1 or state.is_terminal():
         return state.max_score - state.min_score, None
@@ -49,7 +53,7 @@ def alpha_beta(state: GameState, depth: int, alpha: float, beta: float, maximize
         best_score = float("-inf")
 
         for child in state_children:
-            eval_score, _ = alpha_beta(child, depth - 1, alpha, beta, not maximize)
+            eval_score, _ = alpha_beta(child, depth - 1, alpha, beta, not maximize, stats)
 
             if eval_score > best_score:
                 best_score = eval_score
@@ -63,7 +67,7 @@ def alpha_beta(state: GameState, depth: int, alpha: float, beta: float, maximize
         best_score = float("inf")
 
         for child in state_children:
-            eval_score, _ = alpha_beta(child, depth - 1, alpha, beta, not maximize)
+            eval_score, _ = alpha_beta(child, depth - 1, alpha, beta, not maximize, stats)
 
             if eval_score < best_score:
                 best_score = eval_score
